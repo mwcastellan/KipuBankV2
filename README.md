@@ -1,4 +1,6 @@
-# KipuBankV2
+# 🏦 KipuBankV2 – Contrato inteligente en Solidity
+## Autor: Marcelo Walter Castellan 
+## Fecha: 17/10/2025 
 
 ## Descripción del Proyecto
 
@@ -156,7 +158,7 @@ constructor(
 2. **Crear el archivo**: `src/KipuBankV2.sol`
 
 3. **Compilar el contrato**:
-   - Seleccionar compilador 0.8.19
+   - Seleccionar compilador ^0.8.30;
    - Hacer clic en "Compile"
 
 4. **Conectar MetaMask**:
