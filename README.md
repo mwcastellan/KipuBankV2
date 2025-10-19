@@ -60,8 +60,6 @@ KipuBankV2 es la evolución mejorada del contrato original KipuBank. Esta versi�
 **Nuevas funciones administrativas**:
 - `supportNewToken()`: Agregar tokens a la whitelist.
 - `removeTokenSupport()`: Remover tokens de la whitelist.
-- `updateBankCap()`: Actualizar capacidad máxima.
-- `updateWithdrawalLimit()`: Actualizar límite de retiros.
 - `pauseBank()` / `unpauseBank()`: Control de emergencia.
 
 ### 6. Estadísticas y Eventos Mejorados.
