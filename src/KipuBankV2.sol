@@ -29,33 +29,41 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
 
 contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     /*///////////////////////
-        Types declarations
+        Types declarations.
     ///////////////////////*/
     using SafeERC20 for IERC20;
     address public constant NATIVE_TOKEN = address(0);
 
     /*///////////////////////
-        State variables - Immutable
+        State variables - Immutable.
     ///////////////////////*/
+    ///@notice variable inmutable para almacenar la dirección de priceFeed.
     AggregatorV3Interface private immutable i_priceFeed;
+    ///@notice variable inmutable para almacenar límite máximo de depósitos en USD.
     uint256 private immutable i_bankCapUSD;
+    ///@notice variable inmutable para almacenar límite máximo de retiro por transacción en USD.
     uint256 private immutable i_withdrawalLimitUSD;
 
     /*///////////////////////
-        State variables - Storage
+        State variables - Storage.
     ////////////////////////*/
+    ///@notice variable para almacenar número total depósitos.
     uint256 private s_totalDeposits;
+    ///@notice variable para almacenar número total retiros.
     uint256 private s_totalWithdrawals;
 
     /*///////////////////////
         Mappings
     ////////////////////////*/
+    ///@notice balance del remitente en ese token.
     mapping(address => mapping(address => uint256)) private s_userBalances;
+    ///@notice si está soportado el token.
     mapping(address => bool) private s_isTokenSupported;
 
     /*///////////////////////
         Events
     ////////////////////////*/
+    ///@notice evento del depósito.
     event Deposit(
         address indexed user,
         address indexed token,
@@ -63,6 +71,7 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         uint256 valueUSD
     );
 
+    ///@notice evento del retiro.
     event Withdrawal(
         address indexed user,
         address indexed token,
@@ -70,35 +79,48 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         uint256 valueUSD
     );
 
+    ///@notice evento del token.
     event TokenSupported(address indexed token);
+    ///@notice evento del token removido.
     event TokenRemoved(address indexed token);
 
     /*///////////////////////
         Custom errors
     ////////////////////////*/
+    ///@notice error emitido monto = 0.
     error KipuBank__ZeroAmount();
+    ///@notice error emitido saldo insuficiente.
     error KipuBank__InsufficientBalance();
+    ///@notice error emitido capital excedido.
     error KipuBank__BankCapExceeded(
         uint256 current,
         uint256 attempted,
         uint256 cap
     );
+    ///@notice error emitido limite a retirar excedido.
     error KipuBank__WithdrawalLimitExceeded(uint256 amount, uint256 limit);
+    ///@notice error emitido transferncia fallida.
     error KipuBank__TransferFailed();
+    ///@notice error emitido inválido precio.
     error KipuBank__OracleFailed(string reason);
+    ///@notice error emitido token no es válido.
     error KipuBank__TokenNotSupported(address token);
+    ///@notice error emitido no es NATIVE_TOKEN para deposito.
     error KipuBank__UseDepositNative();
+    ///@notice error emitido no es NATIVE_TOKEN para retiro.
     error KipuBank__UseWithdrawNative();
+    ///@notice error emitido no es NATIVE_TOKEN para eliminación.
     error KipuBank__CannotRemoveNativeToken();
 
     /*///////////////////////
         Modifiers
     ////////////////////////*/
+    ///@notice valida el monto.
     modifier validAmount(uint256 _amount) {
         if (_amount == 0) revert KipuBank__ZeroAmount();
         _;
     }
-
+    ///@notice valida el token.
     modifier tokenSupported(address _token) {
         if (!s_isTokenSupported[_token])
             revert KipuBank__TokenNotSupported(_token);
