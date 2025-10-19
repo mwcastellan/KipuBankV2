@@ -4,27 +4,27 @@ pragma solidity ^0.8.30;
 /*///////////////////////
         Imports
 ///////////////////////*/
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /*///////////////////////
         Libraries
 ///////////////////////*/
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /*///////////////////////
         Interfaces
 ///////////////////////*/
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /*
  * @title KipuBankV2 – Contrato inteligente en Solidity.
- * @notice Sistema bancario mejorado con soporte multi-token y oracle de precios
- * @dev Evolución de KipuBank con funcionalidades administrativas y conversión a USD
+ * @notice Sistema bancario mejorado con soporte multi-token y oracle de precios.
+ * @dev Evolución de KipuBank con funcionalidades administrativas y conversión a USD.
  * @author Marcelo Walter Castellan.
- * @Date 17/10/2025.
+ * @Date 18/10/2025.
  */
 
 contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
@@ -471,3 +471,4 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         emit Deposit(msg.sender, NATIVE_TOKEN, msg.value, depositValueUSD);
     }
 }
+
