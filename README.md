@@ -1,6 +1,6 @@
 # 🏦 KipuBankV2 – Contrato inteligente en Solidity
 ## Autor: Marcelo Walter Castellan 
-## Fecha: 17/10/2025 
+## Fecha: 18/10/2025 
 
 ## Descripción del Proyecto
 
@@ -426,52 +426,31 @@ if (block.timestamp - updatedAt > 3600) {
 
 **Mejora futura**: Implementar sistema de múltiples price feeds para cada token.
 
-## Comparación con KipuBank V1
-
-| Característica | V1 | V2 |
-|----------------|----|----|
-| Soporte Multi-Token | ❌ Solo ETH | ✅ ETH + ERC-20 |
-| Oracle de Precios | ❌ No | ✅ Chainlink |
-| Control de Acceso | ❌ No | ✅ Ownable + Pausable |
-| Protección Reentrancy | ❌ No | ✅ ReentrancyGuard |
-| Custom Errors | ✅ Parcial | ✅ Completo |
-| Convenciones de Código | ⚠️ Básicas | ✅ Estándares industria |
-| Límites en USD | ❌ En ETH | ✅ En USD |
-| Whitelist de Tokens | ❌ No | ✅ Sí |
-| Eventos Detallados | ⚠️ Básicos | ✅ Completos |
-| Funciones Administrativas | ❌ No | ✅ Múltiples |
-
 ## Información del Contrato Desplegado
 
 **Red**: Sepolia Testnet  
 
-**Dirección del Contrato**: 0x8bb00bf443e2c06f54c603f70ae75af04122b567
+**Dirección del Contrato**: 0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F
 
-**Explorador**: https://sepolia.etherscan.io/tx/0xfb1bd8d5cb32aface1447a96a146c3d12ed35a92cba8470e7c0186056ffd32b7 
+**Explorador**: https://sepolia.etherscan.io/address/0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F
 
 **Código Verificado**: Sí
+- Successfully generated matching Bytecode and ABI for Contract Address [0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F]
 
 ### Parámetros Utilizados en el Despliegue
 
 - **Bank Cap**: 100,000,000,000 wei (1,000 USD con 8 decimales)
 - **Withdrawal Limit**: 10,000,000,000 wei (100 USD con 8 decimales)
 - **Price Feed**: 0x694AA1769357215DE4FAC081bf1f309aDC325306 (Sepolia ETH/USD)
-
-## Roadmap Futuro (V3)
-
-Posibles mejoras para futuras versiones:
-
-1. **Múltiples Oracles**: Integrar price feeds para cada token ERC-20 soportado
-2. **Validación de Staleness**: Verificar que los datos del oracle no estén desactualizados  
-3. **Bank Cap Multi-Token**: Aplicar límite global considerando todos los tokens
-4. **Sistema de Rewards**: Implementar intereses por mantener fondos depositados
-5. **Governance**: Sistema de votación descentralizado para cambios importantes del protocolo
-6. **Liquidez y Staking**: Permitir que usuarios provean liquidez y obtengan recompensas
-7. **Multi-Chain**: Desplegar en múltiples redes (Ethereum, Polygon, Arbitrum)
+  constructor(
+    uint256 _bankCapUSD,           // Ejemplo: 100000000000 = $1,000 USD (8 decimales)
+    uint256 _withdrawalLimitUSD,   // Ejemplo: 10000000000 = $100 USD (8 decimales)
+    address _priceFeedAddress      // 0x694AA1769357215DE4FAC081bf1f309aDC325306 para Sepolia
+   )
 
 ## Tecnologías y Herramientas Utilizadas
 
-- **Solidity**: ^0.8.19
+- **Solidity**: ^0.8.30
 - **OpenZeppelin Contracts**: v4.9.0+
   - Ownable
   - Pausable
@@ -482,67 +461,20 @@ Posibles mejoras para futuras versiones:
 - **MetaMask**: Interacción con blockchain
 - **Sepolia Testnet**: Red de prueba
 
-## Recursos Adicionales
-
-### Documentación Oficial
-
-- [OpenZeppelin Contracts](https://docs.openzeppelin.com/contracts/)
-- [Chainlink Price Feeds](https://docs.chain.link/data-feeds/price-feeds)
-- [Solidity Documentation](https://docs.soliditylang.org/)
-
-### Tutoriales Relacionados
-
-- [Chainlink Price Feeds Tutorial](https://docs.chain.link/getting-started/consuming-data-feeds)
-- [OpenZeppelin Access Control](https://docs.openzeppelin.com/contracts/access-control)
-- [SafeERC20 Guide](https://docs.openzeppelin.com/contracts/api/token/erc20#SafeERC20)
-
-## Preguntas Frecuentes (FAQ)
-
-**P: ¿Por qué usar address(0) para ETH en lugar de WETH?**  
-R: Por simplicidad y para evitar pasos adicionales de wrapping/unwrapping. Los usuarios pueden depositar ETH directamente.
-
-**P: ¿Qué pasa si el oracle de Chainlink falla?**  
-R: El contrato revertirá con `KipuBank__OracleFailed` y no permitirá depósitos de ETH hasta que el oracle se recupere.
-
-**P: ¿Puedo depositar cualquier token ERC-20?**  
-R: No, solo tokens que hayan sido agregados a la whitelist por el owner mediante `supportNewToken()`.
-
-**P: ¿Por qué hay funciones separadas para ETH y tokens?**  
-R: Para mayor claridad y seguridad. ETH requiere funciones payable, mientras que tokens usan transferFrom.
-
-**P: ¿Qué son los prefijos i_ y s_ en las variables?**  
-R: Son convenciones estándar: `i_` para immutable y `s_` para storage. Mejora la legibilidad del código.
-
-**P: ¿Puedo retirar más del límite de retiro?**  
-R: No, el límite está establecido en USD para proteger contra volatilidad. El owner puede actualizarlo si es necesario.
-
 ## Contribuciones
 
 Este proyecto es parte de un proceso de aprendizaje en desarrollo Web3. Sugerencias y mejoras son bienvenidas.
 
 ## Licencia
 
-MIT License - Ver archivo LICENSE para más detalles
+MIT License - // SPDX-License-Identifier: MIT
 
 ## Contacto y Soporte
 
-**Desarrollador**: Darío Echeverría Muñoz
+**Desarrollador**: Marcelo Walter Castellan
 
-**GitHub**: IusLedger
+**GitHub**: mwcastellan
 
-**Email**: dario@qqrucho.org
+**Email**: mcastellan@yahoo.com
 
-**Fecha de Desarrollo**: Octubre 2025  
-
----
-
-## Agradecimientos
-
-- Equipo de OpenZeppelin por las librerías de contratos
-- Chainlink por los oracles de datos confiables
-- Comunidad de Ethereum por el soporte y documentación
-- Instructores del curso por la guía y feedback
-
----
-
-**Nota Final**: Este contrato ha sido desarrollado con fines educativos. Aunque implementa muchas buenas prácticas de seguridad, se recomienda una auditoría profesional antes de usar en producción con fondos reales.
+**Fecha de Desarrollo**: 18 de Octubre de 2025.
