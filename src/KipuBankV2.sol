@@ -24,7 +24,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
  * @notice Sistema bancario mejorado con soporte multi-token y oracle de precios.
  * @dev Evolución de KipuBank con funcionalidades administrativas y conversión a USD.
  * @author Marcelo Walter Castellan.
- * @Date 18/10/2025.
+ * @Date 19/10/2025.
  */
 
 contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
@@ -38,12 +38,12 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         State variables - Immutable
     ///////////////////////*/
     AggregatorV3Interface private immutable i_priceFeed;
+    uint256 private immutable i_bankCapUSD;
+    uint256 private immutable i_withdrawalLimitUSD;
 
     /*///////////////////////
         State variables - Storage
     ////////////////////////*/
-    uint256 private s_bankCapUSD;
-    uint256 private s_withdrawalLimitUSD;
     uint256 private s_totalDeposits;
     uint256 private s_totalWithdrawals;
 
@@ -72,8 +72,6 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
 
     event TokenSupported(address indexed token);
     event TokenRemoved(address indexed token);
-    event BankCapUpdated(uint256 newCap);
-    event WithdrawalLimitUpdated(uint256 newLimit);
 
     /*///////////////////////
         Custom errors
@@ -122,8 +120,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         uint256 _withdrawalLimitUSD,
         address _priceFeedAddress
     ) Ownable(msg.sender) {
-        s_bankCapUSD = _bankCapUSD;
-        s_withdrawalLimitUSD = _withdrawalLimitUSD;
+        i_bankCapUSD = _bankCapUSD;
+        i_withdrawalLimitUSD = _withdrawalLimitUSD;
         i_priceFeed = AggregatorV3Interface(_priceFeedAddress);
         s_isTokenSupported[NATIVE_TOKEN] = true;
     }
@@ -147,11 +145,11 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         uint256 depositValueUSD = _getUSDValue(NATIVE_TOKEN, msg.value);
         uint256 currentBankValueUSD = _getTotalNativeValueUSD();
 
-        if (currentBankValueUSD + depositValueUSD > s_bankCapUSD) {
+        if (currentBankValueUSD + depositValueUSD > i_bankCapUSD) {
             revert KipuBank__BankCapExceeded(
                 currentBankValueUSD,
                 depositValueUSD,
-                s_bankCapUSD
+                i_bankCapUSD
             );
         }
 
@@ -211,10 +209,10 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         }
 
         uint256 withdrawValueUSD = _getUSDValue(NATIVE_TOKEN, _amount);
-        if (withdrawValueUSD > s_withdrawalLimitUSD) {
+        if (withdrawValueUSD > i_withdrawalLimitUSD) {
             revert KipuBank__WithdrawalLimitExceeded(
                 withdrawValueUSD,
-                s_withdrawalLimitUSD
+                i_withdrawalLimitUSD
             );
         }
 
@@ -282,26 +280,6 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Actualiza el límite máximo de depósitos en USD.
-     * @param _newBankCapUSD Nuevo límite de depósito en USD.
-     * Emits a {BankCapUpdated} event.
-     */
-    function updateBankCap(uint256 _newBankCapUSD) external onlyOwner {
-        s_bankCapUSD = _newBankCapUSD;
-        emit BankCapUpdated(_newBankCapUSD);
-    }
-
-    /**
-     * @notice Actualiza el límite máximo de retiro por transacción en USD.
-     * @param _newLimitUSD Nuevo límite de retiro en USD.
-     * Emits a {WithdrawalLimitUpdated} event.
-     */
-    function updateWithdrawalLimit(uint256 _newLimitUSD) external onlyOwner {
-        s_withdrawalLimitUSD = _newLimitUSD;
-        emit WithdrawalLimitUpdated(_newLimitUSD);
-    }
-
-    /**
      * @notice Pausa todas las operaciones del banco.
      * @dev Solo el propietario puede pausar el contrato.
      */
@@ -347,7 +325,7 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
      * @return Límite actual en USD.
      */
     function getBankCapUSD() external view returns (uint256) {
-        return s_bankCapUSD;
+        return i_bankCapUSD;
     }
 
     /**
@@ -355,7 +333,7 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
      * @return Límite actual en USD.
      */
     function getWithdrawalLimitUSD() external view returns (uint256) {
-        return s_withdrawalLimitUSD;
+        return i_withdrawalLimitUSD;
     }
 
     /**
@@ -457,11 +435,11 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         uint256 depositValueUSD = _getUSDValue(NATIVE_TOKEN, msg.value);
         uint256 currentBankValueUSD = _getTotalNativeValueUSD();
 
-        if (currentBankValueUSD + depositValueUSD > s_bankCapUSD) {
+        if (currentBankValueUSD + depositValueUSD > i_bankCapUSD) {
             revert KipuBank__BankCapExceeded(
                 currentBankValueUSD,
                 depositValueUSD,
-                s_bankCapUSD
+                i_bankCapUSD
             );
         }
 
