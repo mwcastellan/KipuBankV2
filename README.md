@@ -1,84 +1,84 @@
-# 🏦 KipuBankV2 – Contrato inteligente en Solidity
-## Autor: Marcelo Walter Castellan 
-## Fecha: 18/10/2025 
+# 🏦 KipuBankV2 – Contrato inteligente en Solidity.
+## Autor: Marcelo Walter Castellan.
+## Fecha: 19/10/2025.
 
-## Descripción del Proyecto
+## Descripción del Proyecto.
 
 KipuBankV2 es la evolución mejorada del contrato original KipuBank. Esta versión incorpora funcionalidades avanzadas como soporte para múltiples tokens ERC-20, integración con oráculos de Chainlink para conversión de precios, y un sistema de control de acceso robusto para operaciones administrativas.
 
-## Mejoras Principales Implementadas
+## Mejoras Principales Implementadas.
 
-### 1. Control de Acceso y Seguridad
+### 1. Control de Acceso y Seguridad.
 
 **Problema en V1**: No había forma de pausar el contrato en caso de emergencia ni restricciones para funciones administrativas.
 
 **Solución en V2**:
-- Integración de `Ownable` de OpenZeppelin para gestión administrativa
-- Agregado de `Pausable` para pausar operaciones en emergencias
-- `ReentrancyGuard` para protección contra ataques de reentrada
-- Solo el owner puede modificar parámetros del banco
+- Integración de `Ownable` de OpenZeppelin para gestión administrativa.
+- Agregado de `Pausable` para pausar operaciones en emergencias.
+- `ReentrancyGuard` para protección contra ataques de reentrada.
+- Solo el owner puede modificar parámetros del banco.
 
 **Beneficio**: Mayor seguridad y capacidad de respuesta ante situaciones críticas.
 
-### 2. Soporte Multi-Token
+### 2. Soporte Multi-Token.
 
 **Problema en V1**: Solo se podía depositar y retirar ETH nativo.
 
 **Solución en V2**:
-- Sistema de whitelist con `isTokenSupported`
-- Mapping anidado `s_userBalances[usuario][token]` para contabilidad
-- Funciones separadas: `depositNative()` y `depositToken()`
-- Uso de `SafeERC20` para transferencias seguras
-- Patrón "balance difference" para tokens con fee-on-transfer
+- Sistema de whitelist con `isTokenSupported`.
+- Mapping anidado `s_userBalances[usuario][token]` para contabilidad.
+- Funciones separadas: `depositNative()` y `depositToken()`.
+- Uso de `SafeERC20` para transferencias seguras.
+- Patrón "balance difference" para tokens con fee-on-transfer.
 
 **Beneficio**: Los usuarios pueden gestionar múltiples activos en una sola plataforma.
 
-### 3. Integración con Chainlink Oracle
+### 3. Integración con Chainlink Oracle.
 
 **Problema en V1**: Los límites estaban en ETH, causando inconsistencias cuando el precio variaba.
 
 **Solución en V2**:
-- Integración de Chainlink Price Feed para ETH/USD
-- Bank cap y withdrawal limit expresados en USD
-- Conversión automática en cada operación con ETH
+- Integración de Chainlink Price Feed para ETH/USD.
+- Bank cap y withdrawal limit expresados en USD.
+- Conversión automática en cada operación con ETH.
 
 **Beneficio**: Límites consistentes independientemente de la volatilidad del precio de ETH.
 
-### 4. Convenciones de Código y Buenas Prácticas
+### 4. Convenciones de Código y Buenas Prácticas.
 
 **Mejoras implementadas**:
-- Variables inmutables con prefijo `i_` (ejemplo: `i_priceFeed`)
-- Variables de storage con prefijo `s_` (ejemplo: `s_bankCapUSD`)
-- Variables privadas con getters públicos para mejor encapsulación
-- Errores personalizados con prefijo del contrato (ejemplo: `KipuBank__ZeroAmount`)
-- Modificadores para validaciones reutilizables
+- Variables inmutables con prefijo `i_` (ejemplo: `i_priceFeed`).
+- Variables de storage con prefijo `s_` (ejemplo: `s_totalDeposits`).
+- Variables privadas con getters públicos para mejor encapsulación.
+- Errores personalizados con prefijo del contrato (ejemplo: `KipuBank__ZeroAmount`).
+- Modificadores para validaciones reutilizables.
 
 **Beneficio**: Código más legible, mantenible y siguiendo estándares de la industria.
 
-### 5. Gestión Administrativa Mejorada
+### 5. Gestión Administrativa Mejorada.
 
 **Nuevas funciones administrativas**:
-- `supportNewToken()`: Agregar tokens a la whitelist
-- `removeTokenSupport()`: Remover tokens de la whitelist
-- `updateBankCap()`: Actualizar capacidad máxima
-- `updateWithdrawalLimit()`: Actualizar límite de retiros
-- `pauseBank()` / `unpauseBank()`: Control de emergencia
+- `supportNewToken()`: Agregar tokens a la whitelist.
+- `removeTokenSupport()`: Remover tokens de la whitelist.
+- `updateBankCap()`: Actualizar capacidad máxima.
+- `updateWithdrawalLimit()`: Actualizar límite de retiros.
+- `pauseBank()` / `unpauseBank()`: Control de emergencia.
 
-### 6. Estadísticas y Eventos Mejorados
+### 6. Estadísticas y Eventos Mejorados.
 
 **Eventos detallados**:
-- `Deposit`: Incluye usuario, token, cantidad y valor USD
-- `Withdrawal`: Información completa de retiros
-- `TokenSupported` / `TokenRemoved`: Cambios en whitelist
-- `BankCapUpdated` / `WithdrawalLimitUpdated`: Cambios administrativos
+- `Deposit`: Incluye usuario, token, cantidad y valor USD.
+- `Withdrawal`: Información completa de retiros.
+- `TokenSupported` / `TokenRemoved`: Cambios en whitelist.
+- `BankCapUpdated` / `WithdrawalLimitUpdated`: Cambios administrativos.
 
 **Contadores**:
-- `s_totalDeposits`: Total de operaciones de depósito
-- `s_totalWithdrawals`: Total de operaciones de retiro
+- `s_totalDeposits`: Total de operaciones de depósito.
+- `s_totalWithdrawals`: Total de operaciones de retiro.
 
-## Estructura del Contrato
+## Estructura del Contrato.
 
-### Orden de Organización del Código
+### Orden de Organización del Código.
 
 El contrato sigue el orden estándar recomendado:
 
@@ -103,43 +103,43 @@ El contrato sigue el orden estándar recomendado:
 16. View / Pure functions
 ```
 
-### Convenciones de Nomenclatura
+### Convenciones de Nomenclatura.
 
-- **Immutable**: Prefijo `i_` → `i_priceFeed`
-- **Storage**: Prefijo `s_` → `s_bankCapUSD`
-- **Internal/Private**: Prefijo `_` → `_getUSDValue()`
-- **Constants**: MAYÚSCULAS → `NATIVE_TOKEN`
-- **Errores**: `ContractName__ErrorName` → `KipuBank__ZeroAmount`
+- **Immutable**: Prefijo `i_` → `i_priceFeed`.
+- **Storage**: Prefijo `s_` → `s_totalDeposits`.
+- **Internal/Private**: Prefijo `_` → `_getUSDValue()`.
+- **Constants**: MAYÚSCULAS → `NATIVE_TOKEN`.
+- **Errores**: `ContractName__ErrorName` → `KipuBank__ZeroAmount`.
 
-## Instrucciones de Despliegue
+## Instrucciones de Despliegue.
 
-### Prerequisitos
+### Prerequisitos.
 
-1. Tener instalado Remix IDE o Hardhat
-2. MetaMask configurado con testnet (Sepolia recomendada)
-3. ETH de testnet para gas fees
+1. Tener instalado Remix IDE.
+2. MetaMask configurado con testnet (Sepolia recomendada).
+3. ETH de testnet para gas fees.
 
-### Dependencias
+### Dependencias.
 
 El contrato requiere las siguientes librerías:
 
 ```
-@openzeppelin/contracts/access/Ownable.sol
-@openzeppelin/contracts/security/Pausable.sol
-@openzeppelin/contracts/security/ReentrancyGuard.sol
-@openzeppelin/contracts/token/ERC20/IERC20.sol
-@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
-@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol
+@openzeppelin/contracts/access/Ownable.sol.
+@openzeppelin/contracts/security/Pausable.sol.
+@openzeppelin/contracts/security/ReentrancyGuard.sol.
+@openzeppelin/contracts/token/ERC20/IERC20.sol.
+@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol.
+@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol.
 ```
 
-### Dirección del Oracle Chainlink
+### Dirección del Oracle Chainlink.
 
 **Sepolia Testnet - ETH/USD**:
 ```
 0x694AA1769357215DE4FAC081bf1f309aDC325306
 ```
 
-### Parámetros del Constructor
+### Parámetros del Constructor.
 
 ```solidity
 constructor(
@@ -151,37 +151,37 @@ constructor(
 
 **Nota importante sobre decimales**: Los valores USD deben tener 8 decimales (formato del oracle de Chainlink).
 
-### Proceso de Despliegue en Remix
+### Proceso de Despliegue en Remix.
 
-1. **Abrir Remix IDE** (https://remix.ethereum.org)
+1. **Abrir Remix IDE** (https://remix.ethereum.org).
 
-2. **Crear el archivo**: `src/KipuBankV2.sol`
+2. **Crear el archivo**: `src/KipuBankV2.sol`.
 
 3. **Compilar el contrato**:
-   - Seleccionar compilador ^0.8.30;
-   - Hacer clic en "Compile"
+   - Seleccionar compilador ^0.8.30.
+   - Hacer clic en "Compile".
 
 4. **Conectar MetaMask**:
-   - Cambiar a Sepolia testnet
-   - Asegurar tener ETH de prueba
+   - Cambiar a Sepolia testnet.
+   - Asegurar tener ETH de prueba.
 
 5. **Deploy**:
-   - Ir a "Deploy & Run Transactions"
-   - Seleccionar "Injected Provider - MetaMask"
-   - Ingresar parámetros del constructor:
+   - Ir a "Deploy & Run Transactions".
+   - Seleccionar "Injected Provider - MetaMask".
+   - Ingresar parámetros del constructor:.
      ```
      _bankCapUSD: 100000000000
      _withdrawalLimitUSD: 10000000000
      _priceFeedAddress: 0x694AA1769357215DE4FAC081bf1f309aDC325306
      ```
-   - Hacer clic en "Deploy"
-   - Confirmar en MetaMask
+   - Hacer clic en "Deploy".
+   - Confirmar en MetaMask.
 
-6. **Verificar el contrato** en Sepolia Etherscan
+6. **Verificar el contrato** en Sepolia Etherscan.
 
-## Cómo Interactuar con el Contrato
+## Cómo Interactuar con el Contrato.
 
-### Para Usuarios Regulares
+### Para Usuarios Regulares.
 
 **Depositar ETH**:
 ```solidity
@@ -245,16 +245,6 @@ supportNewToken(tokenAddress);
 removeTokenSupport(tokenAddress);
 ```
 
-**Actualizar Bank Cap**:
-```solidity
-updateBankCap(nuevaCapacidadUSD);  // 8 decimales
-```
-
-**Actualizar Límite de Retiro**:
-```solidity
-updateWithdrawalLimit(nuevoLimiteUSD);  // 8 decimales
-```
-
 **Pausar el Banco**:
 ```solidity
 pauseBank();
@@ -265,20 +255,20 @@ pauseBank();
 unpauseBank();
 ```
 
-## Decisiones de Diseño y Trade-offs
+## Decisiones de Diseño y Trade-offs.
 
-### 1. Sistema de Whitelist para Tokens
+### 1. Sistema de Whitelist para Tokens.
 
 **Decisión**: Los tokens deben ser explícitamente aprobados por el owner antes de ser depositados.
 
 **Razón**: Prevenir que tokens maliciosos o con comportamientos extraños sean depositados en el banco.
 
 **Trade-off**:
-- ✅ Mayor seguridad y control
-- ⚠️ Requiere gestión activa del owner
-- ⚠️ Menos permissionless
+- ✅ Mayor seguridad y control.
+- ⚠️ Requiere gestión activa del owner.
+- ⚠️ Menos permissionless.
 
-### 2. Patrón "Balance Difference" en depositToken()
+### 2. Patrón "Balance Difference" en depositToken().
 
 **Decisión**: Calcular la cantidad real recibida midiendo el balance antes y después de la transferencia.
 
@@ -293,22 +283,22 @@ uint256 amountReceived = balanceAfter - balanceBefore;
 ```
 
 **Trade-off**:
-- ✅ Funciona con tokens fee-on-transfer
-- ⚠️ Técnicamente viola Checks-Effects-Interactions
-- ✅ Protegido por `nonReentrant`
+- ✅ Funciona con tokens fee-on-transfer.
+- ⚠️ Técnicamente viola Checks-Effects-Interactions.
+- ✅ Protegido por `nonReentrant`.
 
-### 3. Variables Privadas con Getters
+### 3. Variables Privadas con Getters.
 
 **Decisión**: Hacer variables de estado privadas y exponer getters específicos.
 
 **Razón**: Mejor encapsulación y control sobre cómo se accede a los datos.
 
 **Trade-off**:
-- ✅ Más control y flexibilidad
-- ✅ Posibilidad de agregar lógica en getters
-- ⚠️ Requiere más funciones view
+- ✅ Más control y flexibilidad.
+- ✅ Posibilidad de agregar lógica en getters.
+- ⚠️ Requiere más funciones view.
 
-### 4. Oracle Único para ETH
+### 4. Oracle Único para ETH.
 
 **Decisión**: Solo integrar oracle de Chainlink para ETH/USD, no para tokens ERC-20.
 
@@ -318,19 +308,19 @@ uint256 amountReceived = balanceAfter - balanceBefore;
 
 **Mejora futura**: Agregar múltiples oracles para cada token soportado.
 
-## Características de Seguridad
+## Características de Seguridad.
 
-### Protecciones Implementadas
+### Protecciones Implementadas.
 
-1. **ReentrancyGuard**: Todas las funciones que transfieren fondos usan `nonReentrant`
+1. **ReentrancyGuard**: Todas las funciones que transfieren fondos usan `nonReentrant`.
 
-2. **SafeERC20**: Previene problemas con tokens que no retornan boolean
+2. **SafeERC20**: Previene problemas con tokens que no retornan boolean.
 
-3. **Pausable**: Permite detener operaciones en emergencias
+3. **Pausable**: Permite detener operaciones en emergencias.
 
-4. **Validaciones de precio**: Verifica que el precio del oracle sea mayor a 0
+4. **Validaciones de precio**: Verifica que el precio del oracle sea mayor a 0.
 
-5. **Custom Errors**: Ahorro de gas y mejor información de errores
+5. **Custom Errors**: Ahorro de gas y mejor información de errores.
 
 6. **Uso de call() para ETH**: 
 ```solidity
@@ -340,7 +330,7 @@ if (!success) {
 }
 ```
 
-### Patrón Checks-Effects-Interactions
+### Patrón Checks-Effects-Interactions.
 
 Las funciones de retiro siguen este patrón:
 
@@ -360,37 +350,36 @@ _transferNative(msg.sender, _amount);
 
 **Excepción**: `depositToken()` usa balance difference por necesidad técnica, pero está protegido por `nonReentrant`.
 
-## Casos de Prueba
+## Casos de Prueba.
 
-### Flujo Básico
+### Flujo Básico.
 
-1. ✅ Depositar 0.1 ETH → Balance aumenta, evento emitido
-2. ✅ Retirar 0.05 ETH → Balance disminuye, ETH recibido
-3. ✅ Consultar balance → Muestra valor correcto
-4. ✅ Ver precio ETH → Muestra precio actual del oracle
+1. ✅ Depositar 0.1 ETH → Balance aumenta, evento emitido.
+2. ✅ Retirar 0.05 ETH → Balance disminuye, ETH recibido.
+3. ✅ Consultar balance → Muestra valor correcto.
+4. ✅ Ver precio ETH → Muestra precio actual del oracle.
 
-### Validaciones
+### Validaciones.
 
-1. ✅ Depositar más del bank cap → Falla con `KipuBank__BankCapExceeded`
-2. ✅ Retirar más del balance → Falla con `KipuBank__InsufficientBalance`
-3. ✅ Retirar más del límite USD → Falla con `KipuBank__WithdrawalLimitExceeded`
-4. ✅ Depositar 0 ETH → Falla con `KipuBank__ZeroAmount`
+1. ✅ Depositar más del bank cap → Falla con `KipuBank__BankCapExceeded`.
+2. ✅ Retirar más del balance → Falla con `KipuBank__InsufficientBalance`.
+3. ✅ Retirar más del límite USD → Falla con `KipuBank__WithdrawalLimitExceeded`.
+4. ✅ Depositar 0 ETH → Falla con `KipuBank__ZeroAmount`.
 
-### Tokens ERC-20
+### Tokens ERC-20.
 
-1. ✅ Agregar token a whitelist (owner) → Exitoso
-2. ✅ Depositar token no soportado → Falla con `KipuBank__TokenNotSupported`
-3. ✅ Depositar token soportado → Balance aumenta
-4. ✅ Intentar usar depositNative para token → Falla con error específico
+1. ✅ Agregar token a whitelist (owner) → Exitoso.
+2. ✅ Depositar token no soportado → Falla con `KipuBank__TokenNotSupported`.
+3. ✅ Depositar token soportado → Balance aumenta.
+4. ✅ Intentar usar depositNative para token → Falla con error específico.
 
-### Control de Acceso
+### Control de Acceso.
 
-1. ✅ Owner pausa el banco → Exitoso
-2. ✅ Intentar depositar con banco pausado → Falla
-3. ✅ Usuario normal intenta pausar → Falla con revert de Ownable
-4. ✅ Owner actualiza bank cap → Exitoso, evento emitido
+1. ✅ Owner pausa el banco → Exitoso.
+2. ✅ Intentar depositar con banco pausado → Falla.
+3. ✅ Usuario normal intenta pausar → Falla con revert de Ownable.
 
-## Limitaciones Conocidas
+## Limitaciones Conocidas.
 
 ### 1. Bank Cap No Aplicado a Tokens ERC-20
 
@@ -402,7 +391,7 @@ _transferNative(msg.sender, _amount);
 
 **Mitigación**: El sistema de whitelist permite controlar qué tokens se aceptan.
 
-### 2. No Hay Validación de Staleness del Oracle
+### 2. No Hay Validación de Staleness del Oracle.
 
 **Problema**: No se verifica si los datos del oracle están desactualizados.
 
@@ -418,7 +407,7 @@ if (block.timestamp - updatedAt > 3600) {
 }
 ```
 
-### 3. Conversión USD Solo para ETH
+### 3. Conversión USD Solo para ETH.
 
 **Limitación**: Los valores en USD solo se calculan para ETH nativo, no para tokens ERC-20.
 
@@ -426,50 +415,50 @@ if (block.timestamp - updatedAt > 3600) {
 
 **Mejora futura**: Implementar sistema de múltiples price feeds para cada token.
 
-## Información del Contrato Desplegado
+## Información del Contrato Desplegado.
 
-**Red**: Sepolia Testnet  
+**Red**: Sepolia Testnet.  
 
-**Dirección del Contrato**: 0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F
+**Dirección del Contrato**: 0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F.
 
-**Explorador**: https://sepolia.etherscan.io/address/0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F
+**Explorador**: https://sepolia.etherscan.io/address/0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F.
 
 **Código Verificado**: Sí
-- Successfully generated matching Bytecode and ABI for Contract Address [0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F]
+- Successfully generated matching Bytecode and ABI for Contract Address [0x9aE786f01F8b3517b3b18Ce434B43a184dCC2A8F].
 
 ### Parámetros Utilizados en el Despliegue
 
-- **Bank Cap**: 100,000,000,000 wei (1,000 USD con 8 decimales)
-- **Withdrawal Limit**: 10,000,000,000 wei (100 USD con 8 decimales)
-- **Price Feed**: 0x694AA1769357215DE4FAC081bf1f309aDC325306 (Sepolia ETH/USD)
+- **Bank Cap**: 100,000,000,000 wei (1,000 USD con 8 decimales).
+- **Withdrawal Limit**: 10,000,000,000 wei (100 USD con 8 decimales).
+- **Price Feed**: 0x694AA1769357215DE4FAC081bf1f309aDC325306 (Sepolia ETH/USD).
   constructor(
     uint256 _bankCapUSD,           // Ejemplo: 100000000000 = $1,000 USD (8 decimales)
     uint256 _withdrawalLimitUSD,   // Ejemplo: 10000000000 = $100 USD (8 decimales)
     address _priceFeedAddress      // 0x694AA1769357215DE4FAC081bf1f309aDC325306 para Sepolia
    )
 
-## Tecnologías y Herramientas Utilizadas
+## Tecnologías y Herramientas Utilizadas.
 
-- **Solidity**: ^0.8.30
-- **OpenZeppelin Contracts**: v4.9.0+
+- **Solidity**: ^0.8.30.
+- **OpenZeppelin Contracts**: v4.9.0+.
   - Ownable
   - Pausable
   - ReentrancyGuard
   - SafeERC20
-- **Chainlink**: Price Feeds para ETH/USD
-- **Remix IDE**: Desarrollo y testing
-- **MetaMask**: Interacción con blockchain
-- **Sepolia Testnet**: Red de prueba
+- **Chainlink**: Price Feeds para ETH/USD.
+- **Remix IDE**: Desarrollo y testing.
+- **MetaMask**: Interacción con blockchain.
+- **Sepolia Testnet**: Red de prueba.
 
 ## Contribuciones
 
 Este proyecto es parte de un proceso de aprendizaje en desarrollo Web3. Sugerencias y mejoras son bienvenidas.
 
-## Licencia
+## Licencia.
 
-MIT License - // SPDX-License-Identifier: MIT
+MIT License - // SPDX-License-Identifier: MIT.
 
-## Contacto y Soporte
+## Contacto y Soporte.
 
 **Desarrollador**: Marcelo Walter Castellan
 
@@ -477,4 +466,4 @@ MIT License - // SPDX-License-Identifier: MIT
 
 **Email**: mcastellan@yahoo.com
 
-**Fecha de Desarrollo**: 18 de Octubre de 2025.
+**Fecha de Desarrollo**: 19 de Octubre de 2025.
