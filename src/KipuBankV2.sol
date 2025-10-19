@@ -471,4 +471,3 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         emit Deposit(msg.sender, NATIVE_TOKEN, msg.value, depositValueUSD);
     }
 }
-
