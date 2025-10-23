@@ -24,7 +24,7 @@ import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/Ag
  * @notice Sistema bancario mejorado con soporte multi-token y oracle de precios.
  * @dev Evolución de KipuBank con funcionalidades administrativas y conversión a USD.
  * @author Marcelo Walter Castellan.
- * @Date 19/10/2025.
+ * @Date 22/10/2025.
  */
 
 contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
@@ -154,7 +154,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     /**
      * @notice Deposita ETH nativo en el banco.
      * @dev Verifica límites de depósito y soporte de token antes de aceptar fondos.
-     * Emits a {Deposit} event.
+     * @custom:requirements El contrato debe estar activo (no pausado) y el token nativo debe estar soportado.
+     * @custom:events Emite un evento {Deposit} con detalles del depósito.
      */
     function depositNative()
         external
@@ -186,7 +187,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
      * @dev Usa SafeERC20 para transferencias seguras. Calcula el monto recibido para evitar errores de redondeo.
      * @param _tokenAddress Dirección del token ERC-20 a depositar.
      * @param _amount Cantidad de tokens a depositar.
-     * Emits a {Deposit} event.
+     * @custom:requirements El contrato debe estar activo y el token debe estar soportado.
+     * @custom:events Emite un evento {Deposit} con detalles del depósito.
      */
     function depositToken(
         address _tokenAddress,
@@ -221,7 +223,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
      * @notice Retira ETH nativo del banco.
      * @dev Verifica balance del usuario y límite de retiro antes de transferir.
      * @param _amount Cantidad de ETH a retirar.
-     * Emits a {Withdrawal} event.
+     * @custom:requirements El usuario debe tener saldo suficiente y el retiro no debe exceder el límite en USD.
+     * @custom:events Emite un evento {Withdrawal} con detalles del retiro.
      */
     function withdrawNative(
         uint256 _amount
@@ -251,7 +254,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
      * @dev Verifica balance del usuario antes de transferir.
      * @param _tokenAddress Dirección del token ERC-20 a retirar.
      * @param _amount Cantidad de tokens a retirar.
-     * Emits a {Withdrawal} event.
+     * @custom:requirements El usuario debe tener saldo suficiente en el token especificado.
+     * @custom:events Emite un evento {Withdrawal} con detalles del retiro.
      */
     function withdrawToken(
         address _tokenAddress,
@@ -277,7 +281,7 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
      * @notice Agrega soporte para un nuevo token ERC-20.
      * @dev Solo el propietario puede ejecutar esta función.
      * @param _tokenAddress Dirección del token a habilitar.
-     * Emits a {TokenSupported} event.
+     * @custom:events Emite un evento {TokenSupported} al habilitar el token.
      */
     function supportNewToken(address _tokenAddress) external onlyOwner {
         if (_tokenAddress == NATIVE_TOKEN) {
@@ -291,7 +295,7 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
      * @notice Elimina el soporte para un token ERC-20.
      * @dev No se puede eliminar el token nativo.
      * @param _tokenAddress Dirección del token a deshabilitar.
-     * Emits a {TokenRemoved} event.
+     * @custom:events Emite un evento {TokenRemoved} al deshabilitar el token.
      */
     function removeTokenSupport(address _tokenAddress) external onlyOwner {
         if (_tokenAddress == NATIVE_TOKEN) {
@@ -387,7 +391,6 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     {
         return (s_totalDeposits, s_totalWithdrawals);
     }
-
     /**
      * @notice Obtiene el precio actual de ETH desde el oráculo.
      * @dev Requiere que el precio sea mayor a cero.
