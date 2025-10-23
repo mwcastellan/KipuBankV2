@@ -417,12 +417,12 @@ if (block.timestamp - updatedAt > 3600) {
 
 **Red**: Sepolia Testnet.  
 
-**Dirección del Contrato**: 0xd0260201af08135F06a31D9eE2D46503f8Fb9210.
-- Explorador: https://sepolia.etherscan.io/address/0xd0260201af08135F06a31D9eE2D46503f8Fb9210.
+**Dirección del Contrato**: 0x2b4c9475aA3aeD0CE0FF441dAB372c82f06a7b31.
+- Explorador:  https://sepolia.etherscan.io/address/0x2b4c9475aA3aeD0CE0FF441dAB372c82f06a7b31.
 
 **Código Verificado**: Sí
-- This contract matches the deployed Bytecode of the Source Code for
-   Contract 0x13adCee594C4d295bC70a0dd5202307e5A7E2f53 
+
+**Creador**: 0xD38CFbEa8E7A08258734c13c956912857cD6B37b 
 
 ### Parámetros Utilizados en el Despliegue
 
