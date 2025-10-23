@@ -1,6 +1,6 @@
 # 🏦 KipuBankV2 – Contrato inteligente en Solidity.
 ## Autor: Marcelo Walter Castellan.
-## Fecha: 22/10/2025.
+## Fecha: 23/10/2025.
 
 ## Descripción del Proyecto.
 
@@ -465,4 +465,4 @@ MIT License - // SPDX-License-Identifier: MIT.
 
 **Email**: mcastellan@yahoo.com
 
-**Fecha de Desarrollo**: 22 de Octubre de 2025.
+**Fecha de Desarrollo**: 23 de Octubre de 2025.
