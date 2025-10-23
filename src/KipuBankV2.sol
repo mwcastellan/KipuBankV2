@@ -20,11 +20,11 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 /*
- * @title KipuBankV2 – Contrato inteligente en Solidity.
- * @notice Sistema bancario mejorado con soporte multi-token y oracle de precios.
- * @dev Evolución de KipuBank con funcionalidades administrativas y conversión a USD.
+ * @title KipuBankV2 – Smart contract in Solidity.
+ * @notice Enhanced banking system with multi-token support and price oracle.
+ * @dev Evolution of KipuBank with administrative features and USD conversion.
  * @author Marcelo Walter Castellan.
- * @Date 22/10/2025.
+ * @date 23/10/2025.
  */
 
 contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
@@ -37,33 +37,37 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     /*///////////////////////
         State variables - Immutable.
     ///////////////////////*/
-    ///@notice variable inmutable para almacenar la dirección de priceFeed.
+    ///@notice immutable variable to store priceFeed address.
     AggregatorV3Interface private immutable i_priceFeed;
-    ///@notice variable inmutable para almacenar límite máximo de depósitos en USD.
+
+    ///@notice immutable variable to store maximum deposit limit in USD.
     uint256 private immutable i_bankCapUSD;
-    ///@notice variable inmutable para almacenar límite máximo de retiro por transacción en USD.
+
+    ///@notice immutable variable to store maximum withdrawal limit per transaction in USD.
     uint256 private immutable i_withdrawalLimitUSD;
 
     /*///////////////////////
         State variables - Storage.
     ////////////////////////*/
-    ///@notice variable para almacenar número total depósitos.
+    ///@notice variable to store total number of deposits.
     uint256 private s_totalDeposits;
-    ///@notice variable para almacenar número total retiros.
+
+    ///@notice variable to store total number of withdrawals.
     uint256 private s_totalWithdrawals;
 
     /*///////////////////////
         Mappings
     ////////////////////////*/
-    ///@notice balance del remitente en ese token.
+    ///@notice sender's balance in the given token.
     mapping(address => mapping(address => uint256)) private s_userBalances;
-    ///@notice si está soportado el token.
+
+    ///@notice whether the token is supported.
     mapping(address => bool) private s_isTokenSupported;
 
     /*///////////////////////
         Events
     ////////////////////////*/
-    ///@notice evento del depósito.
+    ///@notice deposit event.
     event Deposit(
         address indexed user,
         address indexed token,
@@ -71,7 +75,7 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         uint256 valueUSD
     );
 
-    ///@notice evento del retiro.
+    ///@notice withdrawal event.
     event Withdrawal(
         address indexed user,
         address indexed token,
@@ -79,48 +83,57 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         uint256 valueUSD
     );
 
-    ///@notice evento del token.
+    ///@notice token supported event.
     event TokenSupported(address indexed token);
-    ///@notice evento del token removido.
+    ///@notice token removed event.
     event TokenRemoved(address indexed token);
 
     /*///////////////////////
         Custom errors
     ////////////////////////*/
-    ///@notice error emitido monto = 0.
+    ///@notice error thrown when amount = 0.
     error KipuBank__ZeroAmount();
-    ///@notice error emitido saldo insuficiente.
+
+    ///@notice error thrown for insufficient balance.
     error KipuBank__InsufficientBalance();
-    ///@notice error emitido capital excedido.
+
+    ///@notice error thrown when bank cap is exceeded.
     error KipuBank__BankCapExceeded(
         uint256 current,
         uint256 attempted,
         uint256 cap
     );
-    ///@notice error emitido limite a retirar excedido.
+
+    ///@notice error thrown when withdrawal limit is exceeded.
     error KipuBank__WithdrawalLimitExceeded(uint256 amount, uint256 limit);
-    ///@notice error emitido transferncia fallida.
+
+    ///@notice error thrown when transfer fails.
     error KipuBank__TransferFailed();
-    ///@notice error emitido inválido precio.
+
+    ///@notice error thrown when oracle returns invalid price.
     error KipuBank__OracleFailed(string reason);
-    ///@notice error emitido token no es válido.
+
+    ///@notice error thrown when token is not supported.
     error KipuBank__TokenNotSupported(address token);
-    ///@notice error emitido no es NATIVE_TOKEN para deposito.
+
+    ///@notice error thrown when native token should be used for deposit.
     error KipuBank__UseDepositNative();
-    ///@notice error emitido no es NATIVE_TOKEN para retiro.
+
+    ///@notice error thrown when native token should be used for withdrawal.
     error KipuBank__UseWithdrawNative();
-    ///@notice error emitido no es NATIVE_TOKEN para eliminación.
+
+    ///@notice error thrown when trying to remove native token support.
     error KipuBank__CannotRemoveNativeToken();
 
     /*///////////////////////
         Modifiers
     ////////////////////////*/
-    ///@notice valida el monto.
+    ///@notice validates that amount is greater than zero.
     modifier validAmount(uint256 _amount) {
         if (_amount == 0) revert KipuBank__ZeroAmount();
         _;
     }
-    ///@notice valida el token.
+    ///@notice validates that token is supported.
     modifier tokenSupported(address _token) {
         if (!s_isTokenSupported[_token])
             revert KipuBank__TokenNotSupported(_token);
@@ -131,12 +144,13 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         Functions
     ////////////////////////*/
     /**
-     * @notice Inicializa el contrato KipuBankV2 con límites y dirección del oráculo.
-     * @dev Marca el token nativo como soportado por defecto.
-     * @param _bankCapUSD Límite máximo de depósitos en USD.
-     * @param _withdrawalLimitUSD Límite máximo de retiro por transacción en USD.
-     * @param _priceFeedAddress Dirección del contrato del oráculo Chainlink.
+     * @notice Initializes the KipuBankV2 contract with deposit and withdrawal limits and the oracle address.
+     * @dev Marks the native token as supported by default.
+     * @param _bankCapUSD Maximum deposit limit in USD.
+     * @param _withdrawalLimitUSD Maximum withdrawal limit per transaction in USD.
+     * @param _priceFeedAddress Address of the Chainlink oracle contract.
      */
+
     constructor(
         uint256 _bankCapUSD,
         uint256 _withdrawalLimitUSD,
@@ -152,11 +166,12 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         External functions
     ////////////////////////*/
     /**
-     * @notice Deposita ETH nativo en el banco.
-     * @dev Verifica límites de depósito y soporte de token antes de aceptar fondos.
-     * @custom:requirements El contrato debe estar activo (no pausado) y el token nativo debe estar soportado.
-     * @custom:events Emite un evento {Deposit} con detalles del depósito.
+     * @notice Deposits native ETH into the bank.
+     * @dev Checks deposit limits and token support before accepting funds.
+     * @custom:requirements The contract must be active (not paused) and the native token must be supported.
+     * @custom:events Emits a {Deposit} event with deposit details.
      */
+
     function depositNative()
         external
         payable
@@ -183,12 +198,12 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Deposita tokens ERC-20 en el banco.
-     * @dev Usa SafeERC20 para transferencias seguras. Calcula el monto recibido para evitar errores de redondeo.
-     * @param _tokenAddress Dirección del token ERC-20 a depositar.
-     * @param _amount Cantidad de tokens a depositar.
-     * @custom:requirements El contrato debe estar activo y el token debe estar soportado.
-     * @custom:events Emite un evento {Deposit} con detalles del depósito.
+     * @notice Deposits ERC-20 tokens into the bank.
+     * @dev Uses SafeERC20 for secure transfers. Calculates the actual received amount to prevent rounding errors.
+     * @param _tokenAddress Address of the ERC-20 token to deposit.
+     * @param _amount Amount of tokens to deposit.
+     * @custom:requirements Contract must be active and token must be supported.
+     * @custom:events Emits a {Deposit} event with deposit details.
      */
     function depositToken(
         address _tokenAddress,
@@ -220,11 +235,11 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Retira ETH nativo del banco.
-     * @dev Verifica balance del usuario y límite de retiro antes de transferir.
-     * @param _amount Cantidad de ETH a retirar.
-     * @custom:requirements El usuario debe tener saldo suficiente y el retiro no debe exceder el límite en USD.
-     * @custom:events Emite un evento {Withdrawal} con detalles del retiro.
+     * @notice Withdraws native ETH from the bank.
+     * @dev Checks the user's balance and withdrawal limit before transferring.
+     * @param _amount Amount of ETH to withdraw.
+     * @custom:requirements User must have sufficient balance and the withdrawal must not exceed the USD limit.
+     * @custom:events Emits a {Withdrawal} event with withdrawal details.
      */
     function withdrawNative(
         uint256 _amount
@@ -250,12 +265,12 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Retira tokens ERC-20 del banco.
-     * @dev Verifica balance del usuario antes de transferir.
-     * @param _tokenAddress Dirección del token ERC-20 a retirar.
-     * @param _amount Cantidad de tokens a retirar.
-     * @custom:requirements El usuario debe tener saldo suficiente en el token especificado.
-     * @custom:events Emite un evento {Withdrawal} con detalles del retiro.
+     * @notice Withdraws ERC-20 tokens from the bank.
+     * @dev Checks the user's balance before transferring.
+     * @param _tokenAddress Address of the ERC-20 token to withdraw.
+     * @param _amount Amount of tokens to withdraw.
+     * @custom:requirements User must have sufficient balance in the specified token.
+     * @custom:events Emits a {Withdrawal} event with withdrawal details.
      */
     function withdrawToken(
         address _tokenAddress,
@@ -278,10 +293,10 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Agrega soporte para un nuevo token ERC-20.
-     * @dev Solo el propietario puede ejecutar esta función.
-     * @param _tokenAddress Dirección del token a habilitar.
-     * @custom:events Emite un evento {TokenSupported} al habilitar el token.
+     * @notice Adds support for a new ERC-20 token.
+     * @dev Only the contract owner can execute this function.
+     * @param _tokenAddress Address of the token to enable.
+     * @custom:events Emits a {TokenSupported} event when the token is enabled.
      */
     function supportNewToken(address _tokenAddress) external onlyOwner {
         if (_tokenAddress == NATIVE_TOKEN) {
@@ -292,10 +307,10 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Elimina el soporte para un token ERC-20.
-     * @dev No se puede eliminar el token nativo.
-     * @param _tokenAddress Dirección del token a deshabilitar.
-     * @custom:events Emite un evento {TokenRemoved} al deshabilitar el token.
+     * @notice Removes support for an ERC-20 token.
+     * @dev The native token cannot be removed.
+     * @param _tokenAddress Address of the token to disable.
+     * @custom:events Emits a {TokenRemoved} event when the token is disabled.
      */
     function removeTokenSupport(address _tokenAddress) external onlyOwner {
         if (_tokenAddress == NATIVE_TOKEN) {
@@ -306,16 +321,16 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Pausa todas las operaciones del banco.
-     * @dev Solo el propietario puede pausar el contrato.
+     * @notice Pauses all bank operations.
+     * @dev Only the contract owner can pause the contract.
      */
     function pauseBank() external onlyOwner {
         _pause();
     }
 
     /**
-     * @notice Reanuda las operaciones del banco.
-     * @dev Solo el propietario puede reanudar el contrato.
+     * @notice Resumes all bank operations.
+     * @dev Only the contract owner can resume the contract.
      */
     function unpauseBank() external onlyOwner {
         _unpause();
@@ -325,10 +340,10 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         View functions
     ////////////////////////*/
     /**
-     * @notice Obtiene el balance de un usuario para un token específico.
-     * @param _user Dirección del usuario.
-     * @param _token Dirección del token.
-     * @return Balance del usuario en ese token.
+     * @notice Returns the balance of a user for a specific token.
+     * @param _user Address of the user.
+     * @param _token Address of the token.
+     * @return User's balance in the specified token.
      */
     function getBalance(
         address _user,
@@ -347,42 +362,42 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Obtiene el límite máximo de depósitos en USD.
-     * @return Límite actual en USD.
+     * @notice Returns the maximum deposit limit in USD.
+     * @return Current deposit limit in USD.
      */
     function getBankCapUSD() external view returns (uint256) {
         return i_bankCapUSD;
     }
 
     /**
-     * @notice Obtiene el límite máximo de retiro por transacción en USD.
-     * @return Límite actual en USD.
+     * @notice Returns the maximum withdrawal limit per transaction in USD.
+     * @return Current limit in USD.
      */
     function getWithdrawalLimitUSD() external view returns (uint256) {
         return i_withdrawalLimitUSD;
     }
 
     /**
-     * @notice Obtiene la dirección del contrato del oráculo de precios.
-     * @return Dirección del oráculo Chainlink.
+     * @notice Returns the address of the price oracle contract.
+     * @return Address of the Chainlink oracle.
      */
     function getPriceFeed() external view returns (address) {
         return address(i_priceFeed);
     }
 
     /**
-     * @notice Verifica si un token está soportado por el banco.
-     * @param _token Dirección del token.
-     * @return true si está soportado, false si no.
+     * @notice Checks whether a token is supported by the bank.
+     * @param _token Address of the token.
+     * @return true if supported, false otherwise.
      */
     function isTokenSupported(address _token) external view returns (bool) {
         return s_isTokenSupported[_token];
     }
 
     /**
-     * @notice Obtiene estadísticas del banco.
-     * @return totalDeposits Número total de depósitos.
-     * @return totalWithdrawals Número total de retiros.
+     * @notice Returns bank statistics.
+     * @return totalDeposits Total number of deposits.
+     * @return totalWithdrawals Total number of withdrawals.
      */
     function getBankStats()
         external
@@ -392,9 +407,9 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         return (s_totalDeposits, s_totalWithdrawals);
     }
     /**
-     * @notice Obtiene el precio actual de ETH desde el oráculo.
-     * @dev Requiere que el precio sea mayor a cero.
-     * @return Precio de ETH en USD con 8 decimales.
+     * @notice Returns the current ETH price from the oracle.
+     * @dev Requires the price to be greater than zero.
+     * @return ETH price in USD with 8 decimals.
      */
     function getETHPrice() public view returns (uint256) {
         (, int256 price, , , ) = i_priceFeed.latestRoundData();
@@ -410,11 +425,11 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         Private functions
     ////////////////////////*/
     /**
-     * @notice Calcula el valor en USD de un monto de ETH.
-     * @dev Solo aplica para el token nativo.
-     * @param _tokenAddress Dirección del token (debe ser ETH).
-     * @param _amount Monto en wei.
-     * @return valueUSD Valor en USD.
+     * @notice Calculates the USD value of a given ETH amount.
+     * @dev Applies only to the native token.
+     * @param _tokenAddress Address of the token (must be ETH).
+     * @param _amount Amount in wei.
+     * @return valueUSD Value in USD.
      */
     function _getUSDValue(
         address _tokenAddress,
@@ -428,8 +443,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Calcula el valor total en USD de los fondos nativos en el contrato.
-     * @return Valor total en USD.
+     * @notice Calculates the total USD value of native funds held in the contract.
+     * @return Total value in USD.
      */
     function _getTotalNativeValueUSD() private view returns (uint256) {
         uint256 totalNative = address(this).balance;
@@ -437,9 +452,9 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     }
 
     /**
-     * @notice Transfiere ETH nativo a una dirección.
-     * @param _to Dirección del destinatario.
-     * @param _amount Monto en wei.
+     * @notice Transfers native ETH to a specified address.
+     * @param _to Recipient address.
+     * @param _amount Amount in wei.
      */
     function _transferNative(address _to, uint256 _amount) private {
         (bool success, ) = _to.call{value: _amount}("");
