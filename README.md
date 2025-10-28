@@ -1,4 +1,9 @@
 # 🏦 KipuBankV2 – Contrato inteligente en Solidity.
+[![Solidity](https://img.shields.io/badge/Solidity-^0.8.30-363636?style=flat-square&logo=solidity)](https://soliditylang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![OpenZeppelin](https://img.shields.io/badge/OpenZeppelin-5.0-4E5EE4?style=flat-square&logo=openzeppelin)](https://openzeppelin.com/)
+[![Chainlink](https://img.shields.io/badge/Chainlink-Oracle-375BD2?style=flat-square&logo=chainlink)](https://chain.link/)
+
 ## Autor: Marcelo Walter Castellan.
 ## Fecha: 27/10/2025.
  
