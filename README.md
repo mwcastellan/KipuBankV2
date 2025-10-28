@@ -1,7 +1,7 @@
 # 🏦 KipuBankV2 – Contrato inteligente en Solidity.
 ## Autor: Marcelo Walter Castellan.
 ## Fecha: 27/10/2025.
-
+ 
 ## Descripción del Proyecto.
 
 KipuBankV2 es la evolución mejorada del contrato original KipuBank. Esta versión incorpora funcionalidades avanzadas como soporte para múltiples tokens ERC-20, integración con oráculos de Chainlink para conversión de precios, y un sistema de control de acceso robusto para operaciones administrativas.
