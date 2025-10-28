@@ -1,6 +1,6 @@
 # 🏦 KipuBankV2 – Contrato inteligente en Solidity.
 ## Autor: Marcelo Walter Castellan.
-## Fecha: 23/10/2025.
+## Fecha: 27/10/2025.
 
 ## Descripción del Proyecto.
 
@@ -334,16 +334,26 @@ Las funciones de retiro siguen este patrón:
 
 ```solidity
 // Checks
-if (s_userBalances[msg.sender][NATIVE_TOKEN] < _amount) {
-    revert KipuBank__InsufficientBalance();
-}
+modifier onlySufficientBalance(
+        address _user,
+        address _token,
+        uint256 _amount
+    ) {
+        if (s_userBalances[_user][_token] < _amount) {
+            revert KipuBank__InsufficientBalance();
+        }
+        _;
+    }
 
 // Effects
-s_userBalances[msg.sender][NATIVE_TOKEN] -= _amount;
-s_totalWithdrawals++;
+unchecked {
+            uint256 previousBalance = s_userBalances[user][token];
+            s_userBalances[user][token] = previousBalance - _amount;
+            s_totalWithdrawals++;
+        }
 
 // Interactions
-_transferNative(msg.sender, _amount);
+_transferNative(user, _amount);
 ```
 
 **Excepción**: `depositToken()` usa balance difference por necesidad técnica, pero está protegido por `nonReentrant`.
@@ -398,7 +408,7 @@ _transferNative(msg.sender, _amount);
 **Mejora sugerida**:
 ```solidity
 (, int256 price, , uint256 updatedAt, ) = i_priceFeed.latestRoundData();
-if (price <= 0) revert KipuBank__OracleFailed("Invalid oracle price");
+if (price <= 0) revert KipuBank__OracleFailed();
 // Agregar validación de tiempo
 if (block.timestamp - updatedAt > 3600) {
     revert KipuBank__OracleFailed("Stale oracle data");
@@ -417,13 +427,20 @@ if (block.timestamp - updatedAt > 3600) {
 
 **Red**: Sepolia Testnet.  
 
-**Dirección del Contrato**: 0x1743cC092241A0Bb29bDEBAC2BD99a4E9c7f0999.
-- Explorador:  https://sepolia.etherscan.io/address/0x1743cC092241A0Bb29bDEBAC2BD99a4E9c7f0999.
+**Dirección del Contrato**: 0x8699706B02A6aa00876cF1050A373e6A63EbcDeE.
+- Explorador:  https://sepolia.etherscan.io/address/0x8699706b02a6aa00876cf1050a373e6a63ebcdee.
 
 **Código Verificado**: Sí
-Successfully generated matching Bytecode and ABI for Contract Address [0x1743cC092241A0Bb29bDEBAC2BD99a4E9c7f0999]
+Verification process started...
+Verifying with Sourcify...
+Verifying with Routescan...
+Etherscan verification skipped: API key not found in global Settings.
+Sourcify verification successful.
+https://repo.sourcify.dev/11155111/0x8699706B02A6aa00876cF1050A373e6A63EbcDeE/
+Routescan verification successful.
+https://testnet.routescan.io/address/0x8699706B02A6aa00876cF1050A373e6A63EbcDeE/contract/11155111/code
 
-**Creador**: 0xD38CFbEa8E7A08258734c13c956912857cD6B37b 
+**Creador**: 0xD38CFbEa8E7A08258734c13c956912857cD6B37b
 
 ### Parámetros Utilizados en el Despliegue
 
@@ -465,4 +482,4 @@ MIT License - // SPDX-License-Identifier: MIT.
 
 **Email**: mcastellan@yahoo.com
 
-**Fecha de Desarrollo**: 23 de Octubre de 2025.
+**Fecha de Desarrollo**: 27 de Octubre de 2025.
