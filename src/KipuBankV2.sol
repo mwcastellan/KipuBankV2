@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
-
 /// @title KipuBankV2 – Smart contract in Solidity.
 /// @notice Enhanced banking system with multi-token support and price oracle.
 /// @dev Evolution of KipuBank with administrative features and USD conversion.
+/* @dev
+ *  - USD amounts and prices are assumed to use 8 decimals (e.g., Chainlink ETH/USD feeds).
+ *  - Bank cap and per-withdrawal limit (if present) apply only to native ETH unless otherwise documented.
+ *  - The `receive()` function can accept ETH even while the contract is paused (by design), unless explicitly guarded.
+ *  - Oracle freshness (e.g., `updatedAt`, `answeredInRound`) is not validated unless otherwise stated.
+ *  - ERC-20 deposit/withdraw events may emit `valueUSD = 0` intentionally to avoid mixing decimals across tokens.
+ *  - This review preserves all prior comments and structure; only documentation lines are added.
+ */
 /// @author Marcelo Walter Castellan.
 /// @date 02/11/2025.
 
@@ -519,6 +526,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
 
     /// @notice Fallback receive function that accepts direct native token (ETH) deposits.
     /// @dev Automatically credits the sender's balance with the sent amount of native token.
+    /// @notice Accepts ETH transfers.
+    /// @dev Intentionally allowed even when paused unless this function is decorated with `whenNotPaused`.
     receive() external payable {
         address user = msg.sender;
         address token = NATIVE_TOKEN;
