@@ -309,8 +309,6 @@ unpauseBank();
 **Oráculo ETH/USD (Sepolia):** `0x694AA1769357215DE4FAC081bf1f309aDC325306`  
 **Dirección desplegada:**
  - https://sepolia.etherscan.io/address/0xC58370BcFBF3Fb3557D286603a45a1b6Fd1C5d2a
-**Contrato:**
- - https://sepolia.etherscan.io/address/0xC58370BcFBF3Fb3557D286603a45a1b6Fd1C5d2a#code#F1#L2
 **Licencia:** MIT
 
 ## 👨‍💻 Desarrollador
