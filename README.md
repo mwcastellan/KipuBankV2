@@ -302,8 +302,6 @@ unpauseBank();
 - Permite depósitos pasivos para evitar pérdida de ETH enviado accidentalmente.
 - No permite retiros ni funciones activas durante pausa.
 
----
-
 ## 🧱 Información Técnica
 
 **Versión Solidity:** ^0.8.30  
@@ -312,7 +310,6 @@ unpauseBank();
 **Dirección desplegada:** https://sepolia.etherscan.io/address/0xC58370BcFBF3Fb3557D286603a45a1b6Fd1C5d2a
 **Contrato:** https://sepolia.etherscan.io/address/0xC58370BcFBF3Fb3557D286603a45a1b6Fd1C5d2a#code#F1#L2
 **Licencia:** MIT
----
 
 ## 👨‍💻 Desarrollador
 
