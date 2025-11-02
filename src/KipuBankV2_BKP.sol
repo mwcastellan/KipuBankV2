@@ -3,11 +3,10 @@ pragma solidity ^0.8.30;
 
 
 /// @title KipuBankV2 – Smart contract in Solidity.
-/// \1/// @custom-policy Paused: deposits disabled (including receive), withdrawals remain allowed.
-/// @custom-policy Cap: USD cap applies to native ETH only in this version.
+/// @notice Enhanced banking system with multi-token support and price oracle.
 /// @dev Evolution of KipuBank with administrative features and USD conversion.
 /// @author Marcelo Walter Castellan.
-/// @date 02/11/2025.
+/// @date 27/10/2025.
 
 /* //////////////////////////////////////////////////////////////////////////////////////// */
 /*                     Imports                                                              */
@@ -166,24 +165,6 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
 
     /// @notice Thrown when trying to remove the native token from supported tokens.
     error KipuBank__CannotRemoveNativeToken();
-    /// @notice Thrown when a function is blocked due to pause state.
-    error KipuBank__Paused();
-
-    /// @notice Thrown when oracle data is stale by time threshold.
-    error KipuBank__OracleStaleData();
-
-    /// @notice Thrown when oracle answeredInRound < roundId (incomplete).
-    error KipuBank__OracleStaleRound();
-
-    /// @notice Thrown when an invalid address is provided.
-    error KipuBank__InvalidAddress();
-
-    /// @notice Thrown when trying to support an already supported token.
-    error KipuBank__AlreadySupported();
-
-    /// @notice Thrown when trying to remove/operate on a non-supported token.
-    error KipuBank__NotSupported();
-
 
     /* //////////////////////////////////////////////////////////////////////////////////////// */
     /*                         Modifiers                                                        */
@@ -393,12 +374,9 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     /// @param _tokenAddress Address of the token to enable.
     /// @custom:events Emits a {TokenSupported} event when the token is enabled.
     function supportNewToken(address _tokenAddress) external onlyOwner {
-        if (_tokenAddress == NATIVE_TOKEN) revert KipuBank__UseDepositNative();
-        if (_tokenAddress == address(0)) revert KipuBank__InvalidAddress();
-        if (s_isTokenSupported[_tokenAddress]) revert KipuBank__AlreadySupported();
-        s_isTokenSupported[_tokenAddress] = true;
-        emit TokenSupported(_tokenAddress);
-    }
+        if (_tokenAddress == NATIVE_TOKEN) {
+            revert KipuBank__UseDepositNative();
+        }
         s_isTokenSupported[_tokenAddress] = true;
         emit TokenSupported(_tokenAddress);
     }
@@ -408,12 +386,9 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     /// @param _tokenAddress Address of the token to disable.
     /// @custom:events Emits a {TokenRemoved} event when the token is disabled.
     function removeTokenSupport(address _tokenAddress) external onlyOwner {
-        if (_tokenAddress == NATIVE_TOKEN) revert KipuBank__CannotRemoveNativeToken();
-        if (_tokenAddress == address(0)) revert KipuBank__InvalidAddress();
-        if (!s_isTokenSupported[_tokenAddress]) revert KipuBank__NotSupported();
-        s_isTokenSupported[_tokenAddress] = false;
-        emit TokenRemoved(_tokenAddress);
-    }
+        if (_tokenAddress == NATIVE_TOKEN) {
+            revert KipuBank__CannotRemoveNativeToken();
+        }
         s_isTokenSupported[_tokenAddress] = false;
         emit TokenRemoved(_tokenAddress);
     }
@@ -492,21 +467,11 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     /// @dev Requires the price to be greater than zero.
     /// @return ETH price in USD with 8 decimals.
     function getETHPrice() public view returns (uint256) {
-        (uint80 roundId, int256 answer, , uint256 updatedAt, uint80 answeredInRound) = i_priceFeed.latestRoundData();
-        if (answer <= 0) revert KipuBank__OracleFailed();
-        if (answeredInRound < roundId) revert KipuBank__OracleStaleRound();
-        // Consider Chainlink feeds stale if older than 2 hours
-        if (block.timestamp - updatedAt > 2 hours) revert KipuBank__OracleStaleData();
+        (, int256 price, , , ) = i_priceFeed.latestRoundData();
 
-        uint8 decimals_ = AggregatorV3Interface(i_priceFeed).decimals();
-        uint256 price = uint256(answer);
-        if (decimals_ < 18) {
-            price = price * (10 ** (18 - decimals_));
-        } else if (decimals_ > 18) {
-            price = price / (10 ** (decimals_ - 18));
+        if (price <= 0) {
+            revert KipuBank__OracleFailed();
         }
-        return price;
-    }
 
         return uint256(price);
     }
@@ -527,9 +492,8 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
         if (_amount == 0) return 0;
         if (_tokenAddress != NATIVE_TOKEN) return 0;
 
-        uint256 ethPrice18 = getETHPrice(); // normalized to 18 decimals
-        // _amount is wei (18 decimals) => (wei * price) / 1e18 == USD with 18 decimals
-        return (_amount * ethPrice18) / 1e18;
+        uint256 ethPrice = getETHPrice();
+        valueUSD = (_amount * ethPrice) / 10 ** 18;
     }
 
     /// @notice Calculates the total USD value of native funds held in the contract.
@@ -556,7 +520,6 @@ contract KipuBankV2 is Ownable, Pausable, ReentrancyGuard {
     /// @notice Fallback receive function that accepts direct native token (ETH) deposits.
     /// @dev Automatically credits the sender's balance with the sent amount of native token.
     receive() external payable {
-        if (paused()) revert KipuBank__Paused();
         address user = msg.sender;
         address token = NATIVE_TOKEN;
 
